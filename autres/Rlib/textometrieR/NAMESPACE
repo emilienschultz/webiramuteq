@@ -1,0 +1,7 @@
+import("grDevices")
+
+# file "R/specificites.R"
+export(pareto, specificites, specificites.probabilities, specificites.lexicon, specificites.lexicon.probabilities, cooccurrences, specificites.lexicon.new)
+
+# file "R/repartition.R"
+export(printrepartition)

@@ -1,0 +1,41 @@
+
+R version 2.9.1 (2009-06-26)
+Copyright (C) 2009 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+
+R est un logiciel libre livré sans AUCUNE GARANTIE.
+Vous pouvez le redistribuer sous certaines conditions.
+Tapez 'license()' ou 'licence()' pour plus de détails.
+
+R est un projet collaboratif avec de nombreux contributeurs.
+Tapez 'contributors()' pour plus d'information et
+'citation()' pour la façon de le citer dans les publications.
+
+Tapez 'demo()' pour des démonstrations, 'help()' pour l'aide
+en ligne ou 'help.start()' pour obtenir l'aide au format HTML.
+Tapez 'q()' pour quitter R.
+
+[Sauvegarde de la session précédente restaurée]
+
+> library(textometrieR);
+> # checking that the output of specificites.probabilities remains the same...
+> data(robespierre);  # loading the sample data set
+> specificites.probabilities(robespierre);
+                     D1           D2        D3           D4        D5
+de         9.434651e-01 0.9979542117 0.2796099 9.774612e-01 0.3093355
+peuple     7.579362e-01 0.9286527817 0.2133715 6.693709e-05 0.9922765
+republique 8.941447e-01 0.6389224800 0.7509756 8.747769e-01 0.6616432
+ennemi     9.388100e-01 0.9790007110 0.5153405 5.092428e-01 0.5390590
+patrie     5.711981e-05 0.3837343979 0.9644425 8.122879e-03 0.7588987
+others     5.423605e-02 0.0002275630 0.5576156 2.521024e-01 0.2893006
+                   D6          D7        D8        D9         D10
+de         0.51176477 0.243664820 0.1549604 0.5911002 0.006236862
+peuple     0.94878218 0.159231855 0.9566718 0.4001917 0.144224817
+republique 0.05251719 0.006305835 0.9893744 0.2906916 0.232545209
+ennemi     0.31450047 0.008810362 0.6811968 0.4413409 0.366560964
+patrie     0.41364577 0.974655165 0.8557652 0.4921304 0.771637262
+others     0.53580477 0.942970424 0.2774148 0.5405062 0.996331474
+> 
+> proc.time()
+utilisateur     système      écoulé 
+      0.392       0.024       0.499 

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=0.0.1
+Type=Application
+Name=IRaMuTeQ-SVN
+Exec=iramuteqsvn
+Terminal=false
+Categories=science;
+Icon=$HOME/iramuteq/images/iraicone.png

@@ -1,0 +1,245 @@
+#library(ca)
+#library(MASS)
+#source('/home/pierre/workspace/iramuteq/Rscripts/afc.R')
+#data<-read.table('output/corpus_bin.csv',header=TRUE,sep='\t')
+source('/home/pierre/workspace/iramuteq/Rscripts/anacor.R')
+
+CHD<-function(data,x=9){
+	dataori=data
+	dtable=data
+	listcol<-list()
+	listmere<-list()
+	a<-0
+	print('vire colonnes vides en entree')#FIXME : il ne doit pas y avoir de colonnes vides en entree !!
+	for (m in 1:length(dtable)) {
+	    if (sum(dtable[m-a])==0) {
+        	print('colonne vide')
+			dtable<-dtable[,-(m-a)]
+			a<-a+1
+	    }
+    }
+	for (i in 1:x) {
+		clnb<-(i*2)
+		listmere[[clnb]]<-i
+		listmere[[clnb+1]]<-i
+		listcol[[clnb]]<-vector()
+		listcol[[clnb+1]]<-vector()
+		#extraction du premier facteur de l'afc
+		print('afc')
+		#afc<-ca(dtable,nd=1)
+		#afc<-corresp(dtable,nd=1)
+		#afc<-fca(dtable)
+		afc<-boostana(dtable,nd=1)
+		#coordonnees des colonnes sur le premier facteur
+		#coordrow=afc$rowcoord
+		#coordrow=as.matrix(afc$rscore)
+		#coordrow<-as.matrix(afc$rproj[,1])
+		coordrow<-as.matrix(afc$row.scores)
+		#row.names(coordrow)<-afc$rownames
+		row.names(coordrow)<-rownames(dtable)
+		#classement en fonction de la position sur le premier facteur
+		#listclasse<-ifelse(coordrow<0,paste('CLASSE',clnb,sep=''),paste('CLASSE',clnb+1,sep=''))
+
+		print('deb recherche meilleur partition')
+		coordrow<-as.matrix(coordrow[order(coordrow[,1]),])
+		#print(rownames(coordrow))
+		zeropoint<-which.min(abs(coordrow))
+		print(zeropoint)
+		g<-length(coordrow[coordrow[,1]<coordrow[zeropoint]])
+		d<-length(coordrow[coordrow[,1]>coordrow[zeropoint]])
+		prct<-1
+		g<-round(g*prct)
+		d<-round(d*prct)
+		print(g)
+		print(d)
+		temptable<-as.matrix(coordrow[(zeropoint-g):(zeropoint+d)])
+		row.names(temptable)<-rownames(coordrow)[(zeropoint-g):(zeropoint+d)]
+		#print(temptable)
+		missing<-zeropoint-g
+		listchi<-vector()
+		chtable<-matrix(0,2,(ncol(dtable)))
+		totforme<-chtable[1,]
+		for (forme in 1:(ncol(dtable))) {
+			totforme[forme]<-sum(dtable[,forme])
+		}		
+		chtable[2,]<-totforme
+		for (l in 1:length(temptable)) {
+		#	print(rownames(temptable)[l])
+			linetoswitch=as.matrix(dtable[rownames(temptable)[l],])
+		#	print(linetoswitch)
+			chtable[1,]<-chtable[1,]+linetoswitch
+			chtable[2,]<-chtable[2,]-linetoswitch
+			valchi<-chisq.test(chtable)$statistic
+			if (is.na(valchi)){
+				valchi<-0
+			}
+			listchi<-append(listchi,valchi)
+		}
+		#listchi<-listchi[!is.na(listchi)]
+		maxchi<-which(listchi==max(listchi))
+		print(max(listchi))
+		print(maxchi)
+		maxchi<-maxchi+missing
+		#print(listchi)
+		#listclasse
+		print('liste classe')
+		print(coordrow[(maxchi)])
+		listclasse<-ifelse(coordrow<=coordrow[(maxchi)],clnb,clnb+1)
+#		listclasse<-ifelse(coordrow<0,clnb,clnb+1)
+		listchi<-as.matrix(listchi)
+		listchi<-cbind(listchi,temptable)
+		filename<-paste('graphechi',as.character(i))
+		filename<-paste(filename,'.jpeg')
+		jpeg(filename)
+		plot(listchi[,1]~listchi[,2])
+		abline(v=0)
+		print(coordrow[zeropoint-g])
+		abline(v=coordrow[zeropoint-g])
+		abline(v=coordrow[zeropoint+d])
+		abline(v=coordrow[(maxchi)])
+		dev.off()
+		
+		#ajout du classement au tableau
+		dtable<-transform(dtable,cl1=listclasse)
+		
+		#calcul de la specificite des colonnes
+		t1<-dtable[dtable$cl1==clnb,]
+		t2<-dtable[dtable$cl1==clnb+1,]
+		
+		for (k in 1:(ncol(dtable)-1)) {
+			t<-matrix(0,2,2)
+			t[1,1]<-sum(t1[,k])
+			t[1,2]<-sum(t2[,k])
+			t[2,1]<-nrow(t1)-t[1,1]
+			t[2,2]<-nrow(t2)-t[1,2]
+			chi<-chisq.test(t)
+			if (chi$statistic>6){#FIXME : valeur a mettre en option base :2.7
+				if (chi$expected[1,1]<t[1,1]){
+					listcol[[clnb+1]]<-append(listcol[[clnb+1]],k)
+				} else {
+					listcol[[clnb]]<-append(listcol[[clnb]],k)
+				}
+			}
+		}
+		
+		#lignes concernees
+		listrownamedtable<-rownames(dtable)
+		listrownamedtable<-as.integer(listrownamedtable)
+        newcol<-vector(length=nrow(dataori))
+		#remplissage de la nouvelle colonne avec les nouvelles classes
+		print('remplissage')
+		num<-0
+		for (ligne in listrownamedtable) {
+			num<-num+1
+			newcol[ligne]<-as.vector(dtable$cl1[num])[1]
+		}
+		#recuperation de la classe precedante pour les cases vides
+		print('recuperation classes precedentes')
+		matori<-as.matrix(dataori)
+        if (i!=1) {
+        #    options(warn=-1)
+            for (ligne in 1:length(newcol)) {
+         #       print(newcol[ligne])
+                if (newcol[ligne]==0) { # ce test renvoie un warning
+                    newcol[ligne]<-matori[ligne,length(matori[1,])]
+                }
+            }
+         #   options(warn=0)
+        }
+		#???????????????????????????????????
+		#je ne comprends pas : j'ai vraiment besoin de faire ces deux actions  pour ajouter la nouvelle colonne aux donnees ?
+		#si je ne le fais pas, ca plante...
+		dataori<-cbind(dataori,newcol)
+		dataori<-transform(dataori,newcol=newcol)
+		#???????????????????????????????????
+		
+		#liste des noms de colonne
+		#colname<-colnames(dataori)
+		#nom de la derniere colonne
+		#colname<-colname[length(dataori)]
+		#la derniere colonne
+		colclasse<-as.character(dataori[,ncol(dataori)])
+		#print(colclasse)
+        #les modalites de la derniere colonne
+		classes<-levels(as.factor(colclasse))
+		print(classes)
+		#determination de la classe la plus grande
+		tailleclasse<-paste(NULL,1:length(classes))
+		b<-0
+		for (classe in classes) {
+		   b<-b+1
+		   dtable<-dataori[dataori[length(dataori)]==classe,]
+		   tailleclasse[b]<-length(dtable[,1])
+		}
+		tailleclasse<-as.integer(tailleclasse)
+		print(tailleclasse)
+		plusgrand<-which(tailleclasse==max(tailleclasse))
+		
+		#???????????????????????????????????
+		#Si 2 classes ont des effectifs egaux, on prend la premiere de la liste...
+		if (length(plusgrand)>1) {
+			plusgrand<-plusgrand[1]
+		}
+		#????????????????????????????????????
+		
+		#constuction du prochain tableau a analyser
+		print('construction tableau suivant')
+		classe<-classes[plusgrand]
+		dtable<-dataori[dataori[length(dataori)]==classe,]
+		dtable<-dtable[,1:(length(dtable)-i)]
+		
+		
+		listcolelim<-listcol[[as.integer(classe)]]
+		mother<-listmere[[as.integer(classe)]]
+		while (mother!=1) {
+			listcolelim<-append(listcolelim,listcol[[mother]])
+			print(listcolelim)
+			mother<-listmere[[mother]]
+		}
+		
+		listcolelim<-sort(unique(listcolelim))
+		print(listcolelim)
+		print('avant')
+		print(ncol(dtable))
+		if (!is.logical(listcolelim)){
+			print('elimination colonne')
+			a<-0
+			for (col in listcolelim){
+				dtable<-dtable[,-(col-a)]
+				a<-a+1
+			}
+		}
+		print('apres')
+		print(ncol(dtable))
+		#elimination des colonnes ne contenant que des 0
+		print('vire colonne vide dans boucle')
+		a<-0
+		for (m in 1:ncol(dtable)) {
+			if (sum(dtable[,m-a])==0) {
+				dtable<-dtable[,-(m-a)]
+				a<-a+1
+			}
+		}
+		#elimination des lignes ne contenant que des 0
+#		print('vire ligne vide dans boucle')
+#		a<-0
+#		for (m in 1:nrow(dtable)) {
+#			if (sum(dtable[m-a,])==0) {
+#				print('ligne vide')
+#				dtable<-dtable[-(m-a),]
+#				a<-a+1
+#			}
+#		}
+	}
+	dataori[(length(dataori)-x+1):length(dataori)]
+}
+
+#dataout<-CHD(data,9)
+
+#library(cluster)
+#dissmat<-daisy(dataout, metric = 'gower', stand = FALSE)
+#chd<-diana(dissmat,diss=TRUE,)
+
+
+#pour tester le type, passer chaque colonne en matice et faire mode(colonne)
+#for (i in 1:13) {tmp<-as.matrix(data[i]);print(mode(tmp))}

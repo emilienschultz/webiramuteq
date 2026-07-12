@@ -1,0 +1,142 @@
+<center>'''Documentation Iramuteq'''</center>
+
+
+<center>version 0.1</center>
+
+
+<center>Pierre Ratinaud</center>
+
+
+== '''Table des matières''' ==
+1 Présentation d'iramuteq3
+
+1.1 R3
+
+1.2 Python3
+
+1.3 Lexique 33
+
+2 Analyses de textes3
+
+2.1 Format des données en entrée3
+
+2.2 Statistiques textuelles4
+
+2.3 Comme Lexico4
+
+2.4 AFC sur UCI5
+
+2.5 Analyses ALCESTE5
+
+2.6 Classification par matrice des distances5
+
+3 Analyses de tableaux de données5
+
+3.1 Format des données en entrée5
+
+3.2 Fréquences5
+
+3.3 Chi 25
+
+3.4 T de Student5
+
+3.5 Classification5
+
+3.5.1 Par matrice des distances5
+
+3.5.2 Méthode ALCESTE5
+
+3.6 AFCM5
+
+3.7 Graphes5
+
+4 Bibliographie5
+
+5 Annexes5= Présentation d'iramuteq =
+Iramuteq est un logiciel d'analyse de textes et de tableaux de données. Il s'appuie sur le logiciel de statistique R ([http://www.r-project.org/ http://www.r-project.org]), sur le langage python ([http://www.python.org/ http://www.python.org]) et sur la base de données lexicales Lexique ([http://www.lexique.org/ http://www.lexique.org]).
+
+
+<center>ATTENTION</center>
+
+
+Iramuteq est en cours de développement. Regardez les informations disponibles sur la page [http://repere.no-ip.org/logiciel/iramuteq http://repere.no-ip.org/logiciel/iramuteq] pour connaître la fiabilité des différentes analyses.
+
+== R ==
+[http://www.r-project.org/ http://www.r-project.org]
+
+
+== Python ==
+[http://www.python.org/ http://www.python.org]
+
+
+== Lexique 3 ==
+[http://www.lexique.org/ http://www.lexique.org]
+
+
+= Analyses de textes =
+== Format des données en entrée ==
+Les fichiers d'entrée doivent être au format texte brut (.txt) et respecter les règles de formatage des corpus ALCESTE.
+
+Dans ce formatage, l'unité de base est appelée «&nbsp;unité de contexte initiale&nbsp;» (uci). Une uci peu représenter un entretien, un article, un livre ou tout autre type de documents. Un corpus peut contenir une ou plusieurs uci (mais au minimum une).
+
+
+[[Image:]] Les noms des fichiers ne doivent pas contenir d'espace ou de caractères spéciaux. 
+
+'Mon corpus.txt' ne fonctionnera pas alors que 'moncorpus.txt' ou 'mon_corpus.txt' ne posent pas de problèmes.
+
+
+Les uci sont introduites par quatre étoiles (****) suivies d'une série de variables étoilées séparées par un espace. Il est possible de placer des variables étoilées à l'intérieur des corpus en les introduisant en début de ligne par un tiret et une étoile (-*). La ligne ne doit contenir que cette variable.
+
+
+Exemple :
+
+
+ <nowiki>**** *var_1 *var_2</nowiki>
+
+ -*thematique1
+ texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte
+
+ -*thematique2
+ texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte
+
+ <nowiki>**** *var_2 *var_3</nowiki>
+
+ -*thematique1
+ texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte
+
+ -*thematique2
+ texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte
+
+
+[[Image:]] Les variables étoilées et les thématiques introduites dans le corpus ne doivent pas contenir d'espaces ou de caractères spéciaux. Elles ne doivent contenir que des caractères parmi a-z, A-Z, 1-9 et des tirets bas (_).
+
+<nowiki>*age 18 ans n'est pas un bon codage</nowiki>
+
+<nowiki>*age_18 est un bon codage</nowiki>
+
+<nowiki>*entretien_d'Emilie n'est pas un bon codage</nowiki>
+
+<nowiki>*ent_emilie est un bon codage</nowiki>
+
+
+== Statistiques textuelles ==
+== Comme Lexico ==
+== AFC sur UCI ==
+== Analyses ALCESTE ==
+== Classification par matrice des distances ==
+TODO
+
+
+= Analyses de tableaux de données =
+== Format des données en entrée ==
+== Fréquences ==
+== Chi 2 ==
+== T de Student ==
+== Classification ==
+=== Par matrice des distances ===
+=== Méthode ALCESTE ===
+== AFCM ==
+== Graphes ==
+= Bibliographie =
+= Annexes =
+

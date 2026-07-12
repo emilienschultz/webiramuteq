@@ -1,0 +1,93 @@
+== Format des données en entrée ==
+
+Les fichiers d'entrée doivent être au format texte brut (.txt) et respecter les règles de formatage des corpus ALCESTE.
+
+Dans ce formatage, l'unité de base est appelée «&nbsp;unité de contexte initiale&nbsp;» (uci). Une uci peu représenter un entretien, un article, un livre ou tout autre type de documents. Un corpus peut contenir une ou plusieurs uci (mais au minimum une).
+
+
+Les uci sont introduites par quatre étoiles (****) suivies d'une série de variables étoilées séparées par un espace. Il est possible de placer des variables étoilées à l'intérieur des corpus en les introduisant en début de ligne par un tiret et une étoile (-*). La ligne ne doit contenir que cette variable.
+
+Exemple d'un corpus sans thématique:
+<pre style="CSS text">
+<nowiki>**** *var_1 *var_2</nowiki>
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte
+
+<nowiki>**** *var_2 *var_3</nowiki>
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte</pre>
+
+
+Exemple d'un corpus avec thématique :
+
+<pre style="CSS text">
+<nowiki>**** *var_1 *var_2</nowiki>
+
+-*thematique1
+
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte
+
+-*thematique2
+
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte 
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte
+
+<nowiki>**** *var_2 *var_3</nowiki>
+
+-*thematique1
+
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte
+texte texte texte texte texte texte texte texte texte texte texte
+
+-*thematique2
+
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte
+texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte texte
+texte texte texte texte texte texte texte texte texte texte texte</pre>
+
+{{note|Les variables étoilées et les thématiques introduites dans le corpus ne doivent pas contenir d'espaces ou de caractères spéciaux. Elles ne doivent contenir que des caractères parmi a-z, A-Z, 1-9 et des tirets bas (_).}}
+
+
+<pre><nowiki>*age 18 ans n'est pas un bon codage</nowiki>
+
+<nowiki>*age_18 est un bon codage</nowiki>
+
+<nowiki>*entretien_d'Emilie n'est pas un bon codage</nowiki>
+
+<nowiki>*ent_emilie est un bon codage</nowiki></pre>

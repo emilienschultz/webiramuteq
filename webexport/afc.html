@@ -1,0 +1,236 @@
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width">
+  <title>%(titre)s</title>
+<script src="js/jquery.min.js"></script>
+<script src="js/sigma.min.js"></script>
+<script src="js/sigma.parseGexf.js"></script>
+<script type="text/javascript" src="js/jquery.jqplot.min.js"></script>
+<script type="text/javascript" src="js/jqplot.barRenderer.min.js"></script>
+<script type="text/javascript" src="js/jqplot.categoryAxisRenderer.min.js"></script>
+<script type="text/javascript" src="js/jqplot.pointLabels.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+  <h2 class="span12" id="post-title">%(titre)s</h2>
+   <div class="span12 sigma-parent" id="sigma-example-parent">
+        <div id="popup">
+        </div>
+        <div id="barplot" style="height:200px; width:%(bargraphw)ipx;">
+        </div>
+    <div class="sigma-expand" id="sigma-example"></div>
+  </div>
+</div>
+
+<script type="text/javascript">
+function init() {
+  // Instanciate sigma.js and customize rendering :
+  //var sigInst = sigma.init(document.getElementById('sigma-example')).drawingProperties({
+  var sigInst = sigma.init($('#sigma-example')[0]).drawingProperties({
+    defaultLabelColor: '#fff',
+    //defaultLabelSize: 10,
+    labelSize: 'proportional',
+    labelSizeRatio: 2,
+    defaultLabelBGColor: '#fff',
+    defaultLabelHoverColor: '#000',
+    labelThreshold: 6,
+    labelColor: 'node',
+    defaultEdgeType: 'line'
+  }).graphProperties({
+    minNodeSize: 0.3,
+    maxNodeSize: 20,
+    minEdgeSize: 0.01,
+    maxEdgeSize: 1
+  }).mouseProperties({
+    maxRatio: 32
+  });
+
+  // Parse a GEXF encoded file to fill the graph
+  // (requires "sigma.parseGexf.js" to be included)
+    sigInst.parseGexf('%(gexffile)s');
+
+//attributs
+(function(){
+var popUp;
+var monplot;
+
+// This function is used to generate the attributes list from the node attributes.
+// Since the graph comes from GEXF, the attibutes look like:
+// [
+// { attr: 'Lorem', val: '42' },
+// { attr: 'Ipsum', val: 'dolores' },
+// ...
+// { attr: 'Sit', val: 'amet' }
+// ]
+function attributesToString( node ) {
+    var attr = node['attr']['attributes'];
+    var cl = [];
+    var chis = [];
+    var li = [];
+    for (var i = 0; i < attr.length; i++) {
+        if (attr[i].attr.substring(0,9) == 'chiclasse') {
+             cl.push(attr[i].attr.substring(10));
+             chis.push(parseFloat(attr[i].val));
+        } else {
+            li.push('<li>' + attr[i].attr + ' : ' + attr[i].val + '</li>');
+        }
+    }
+        var txt = '<ul>' + '<li><strong>Label : ' + node.label + '</strong></li>' + li.join('') + '<li><table border=1 style="font-size:10px;"><tr><td>' + cl.join('</td><td>') + '</td></tr><tr><td>' + chis.join('</td><td>') + '</td></tr></table></li></ul>';
+        return [txt,chis,cl];
+//    return '<ul>' +
+//attr.map(function(o){
+//return '<li>' + o.attr + ' : ' + o.val + '</li>';
+//}).join('') +
+//'</ul>';
+}
+ 
+function showNodeInfo(event) {
+    popUp && popUp.remove();
+     
+    var node;
+    sigInst.iterNodes(function(n){
+    node = n;
+    },[event.content[0]]);
+     
+    var theatt = attributesToString( node ) 
+
+    monplot = $.jqplot('barplot', [theatt[1]], {
+            seriesDefaults:{
+            renderer:$.jqplot.BarRenderer,
+            rendererOptions: {fillToZero: true, barPadding: 0, barMargin: 0, barWidth: null}
+        },
+        axes: {
+            xaxis: {
+                renderer: $.jqplot.CategoryAxisRenderer,
+                ticks: theatt[2],
+            },
+            yaxis: {
+                pad: 1.05,
+                tickOptions: {formatString: '%%d'}
+            }          
+         },
+    });
+
+    popUp = $(
+    '<div class="node-info-popup"></div>'
+    ).append(
+    // The GEXF parser stores all the attributes in an array named
+    // 'attributes'. And since sigma.js does not recognize the key
+    // 'attributes' (unlike the keys 'label', 'color', 'size' etc),
+    // it stores it in the node 'attr' object :
+    theatt[0]
+    ).attr(
+    'id',
+    'node-info'+sigInst.getID()
+    ).css({
+    'display': 'inline-block',
+    'border-radius': 3,
+    'padding': 5,
+    'background': 'rgba(200,200,200,0.6)',
+    'color': '#000',
+    'box-shadow': '0 0 4px #666',
+    //'position': 'absolute',
+    //'left': node.displayX,
+    //'top': node.displayY+15,
+    'font-size': '12px',
+    });
+ 
+    //$('ul',popUp).css('margin','0 0 0 20px');
+    $('#popup').append(popUp);
+    $('#barplot').append(monplot);
+    monplot.replot();
+    //$('#sigma-example').append(popUp);
+}
+ 
+function hideNodeInfo(event) {
+    popUp && popUp.remove();
+    popUp = false;
+}
+ 
+var greyColor = 'rgba(255,255,255,0.2)';
+sigInst.bind('overnodes',function(event){
+    var node;
+    sigInst.iterNodes(function(n){
+    node = n;
+    },[event.content[0]]);
+    var nodes = [node.id];
+    sigInst.iterNodes(function(n){
+        //if(!neighbors[n.id]){
+        if(n.color != node.color && n.label != 'F1' && n.label != 'F2') {
+            if(!n.attr['grey']){
+                n.attr['true_color'] = n.color;
+                n.color = greyColor;
+                n.attr['grey'] = 1;
+            }
+        }else{
+            n.color = n.attr['grey'] ? n.attr['true_color'] : n.color;
+            n.attr['grey'] = 0;
+        }
+    }).draw(2,2,2);
+}).bind('outnodes',function(){
+
+    sigInst.iterEdges(function(e){
+        e.color = e.attr['grey'] ? e.attr['true_color'] : e.color;
+        e.attr['grey'] = 0;
+    }).iterNodes(function(n){
+        n.color = n.attr['grey'] ? n.attr['true_color'] : n.color;
+        n.attr['grey'] = 0;
+    }).draw(2,2,2);
+});
+
+//.bind('outnodes',hideNodeInfo)
+sigInst.bind('overnodes',showNodeInfo).draw();
+})();
+}
+  // Draw the graph :
+//  sigInst.draw();
+//}
+
+if (document.addEventListener) {
+  document.addEventListener("DOMContentLoaded", init, false);
+} else {
+  window.onload = init;
+}
+</script>
+<style type="text/css">
+  .jqplot-axis {
+  font-size:10px;
+  }
+  #barplot {
+    position: relative;
+    left:850px;
+
+    }
+   #popup {
+    position: relative;
+    left:850px;
+    }
+
+  /* sigma.js context : */
+  .sigma-parent {
+    position: relative;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    background: #222;
+    height: 700px;
+    width: 800px;
+  }
+  .sigma-expand {
+    position: absolute;
+    width: 100%%;
+    height: 100%%;
+    top: 0;
+    left: 0;
+  }
+  .buttons-container{
+    padding-bottom: 8px;
+    padding-top: 12px;
+  }
+</style>
+
+</body>
+</html>

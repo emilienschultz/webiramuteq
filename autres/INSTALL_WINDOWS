@@ -1,0 +1,28 @@
+dépendances :
+R 2.13.2
+http://cran.cict.fr/bin/windows/
+
+python 2.7
+http://www.python.org/
+
+Numpy
+http://surfnet.dl.sourceforge.net/sourceforge/numpy/
+
+wxpython (2.8)
+http://surfnet.dl.sourceforge.net/sourceforge/wxpython/
+
+xlrd :
+http://pypi.python.org/pypi/xlrd
+
+package de R :
+rgl
+ca
+gee
+ape
+igraph
+proxy
+textometry
+
+
+pour gui2exe :
+mettre le manifeste directement dans Constants.py

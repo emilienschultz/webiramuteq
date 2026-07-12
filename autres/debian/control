@@ -1,0 +1,12 @@
+Source: iramuteq
+Standards-Version: 0.1.8
+Section: science
+Priority: extra
+Maintainer: Pierre Ratinaud <ratinaud@univ-tlse2.fr>
+Build-Depends: debhelper (>= 7)
+Homepage: http://www.iramuteq.org
+
+Package: iramuteq
+Architecture: all
+Depends: python (>= 2.7), r-base (>= 3.0.0), python-wxgtk2.8 (>= 2.8), python-xlrd (>= 0.6), python-ooolib, r-cran-rgl (>= 0.79)
+Description: Interface de R pour les analyses multidimensionnelles

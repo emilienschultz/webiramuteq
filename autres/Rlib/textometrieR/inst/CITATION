@@ -1,0 +1,14 @@
+citHeader("To cite 'textometrieR' in publications use:")
+
+citEntry(entry="article",
+	 title="The textometrieR software package for textual corpora description",
+         author=personList(as.person("Sylvain Loiseau"), as.person("Matthieu Decorde")),
+	 journal="",
+         volume="",
+         pages="",
+         year="",
+         url="",
+         textVersion=paste("",
+                           "",
+                           "",
+                           "", sep=""))

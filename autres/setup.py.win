@@ -1,0 +1,50 @@
+# setup.py
+from distutils.core import setup
+import py2exe
+import os
+import glob
+
+list_conf = os.listdir("configuration")
+conf = [os.path.join("configuration",f) for f in list_conf if f != '.svn']
+
+list_r = os.listdir("Rscripts")
+rscripts = [os.path.join("Rscripts",f) for f in list_r if f != '.svn']
+
+list_i = os.listdir("images")
+images = [os.path.join("images",f) for f in list_i if f != '.svn']
+
+list_d = os.listdir("dictionnaires")
+dicos = [os.path.join("dictionnaires", f) for f in list_d if f !='.svn']
+
+excludes = ['_gtkagg', '_tkagg', 'curses', 'pywin.debugger',
+             'pywin.debugger.dbgcon', 'pywin.dialogs', 'tcl',
+             'Tkconstants', 'Tkinter']
+
+dll_excludes = ['tcl85.dll', 'tk85.dll']
+
+
+py26MSdll = glob.glob(r"dll\\*.*")
+
+data_files = [("Microsoft.VC90.CRT", py26MSdll),
+                ("lib\\Microsoft.VC90.CRT", py26MSdll),]
+data_files += [("configuration",conf),
+            ("Rscripts",rscripts),
+            ("locale\\fr_FR\\LC_MESSAGES", ["locale\\fr_FR\\LC_MESSAGES\\iramuteq.mo"]),
+            ("locale\\en\\LC_MESSAGES", ["locale\\en\\LC_MESSAGES\\iramuteq.mo"]),
+            ("dictionnaires", dicos),
+            ("images",images),
+            ("",["gpl-2.0.txt","gpl-2.0-fr.txt","son_fin.wav"])]
+setup(
+windows = [
+{
+"script": "iramuteq.py",
+"icon_resources": [(1, "images\\iraiconw7.ico")]
+}
+],
+options={"py2exe":{"packages":["wx", "dbhash"],
+                   "excludes" : excludes,
+                   "dll_excludes" : dll_excludes,} 
+        },
+data_files = data_files,
+) 
+#incomplet

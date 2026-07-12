@@ -1,0 +1,121 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+
+
+
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	# Add here commands to configure the package.
+
+	touch configure-stamp
+
+
+build: build-stamp
+
+build-stamp: configure-stamp  
+	dh_testdir
+
+	# Add here commands to compile the package.
+	#$(MAKE)
+	#docbook-to-man debian/iramuteq.sgml > iramuteq.1
+
+	touch build-stamp
+
+clean: 
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+
+	# Add here commands to clean up after the build process.
+	#$(MAKE) clean
+
+	dh_clean 
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k 
+	dh_installdirs
+
+	# Add here commands to install the package into debian/iramuteq.
+	#$(MAKE) DESTDIR=$(CURDIR)/debian/iramuteq install
+	mkdir -p $(CURDIR)/debian/iramuteq
+	cp iramuteq $(CURDIR)/debian/iramuteq/usr/bin/iramuteq
+	cp *.py $(CURDIR)/debian/iramuteq/usr/share/iramuteq
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/dictionnaires
+	cp dictionnaires/* $(CURDIR)/debian/iramuteq/usr/share/iramuteq/dictionnaires
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/Rscripts
+	cp Rscripts/* $(CURDIR)/debian/iramuteq/usr/share/iramuteq/Rscripts
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/images
+	cp images/* $(CURDIR)/debian/iramuteq/usr/share/iramuteq/images
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/configuration
+	cp configuration/* $(CURDIR)/debian/iramuteq/usr/share/iramuteq/configuration
+	cp iramuteq.desktop $(CURDIR)/debian/iramuteq/usr/share/applications
+	cp images/iraicone.png $(CURDIR)/debian/iramuteq/usr/share/icons
+	cp son_fin.wav $(CURDIR)/debian/iramuteq/usr/share/iramuteq
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/en
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/en/LC_MESSAGES
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/fr_FR
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/fr_FR/LC_MESSAGES
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/pt_PT
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/pt_PT/LC_MESSAGES
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/it_IT
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/it_IT/LC_MESSAGES
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/es_ES
+	mkdir -p $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/es_ES/LC_MESSAGES
+	cp locale/en/LC_MESSAGES/iramuteq.mo $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/en/LC_MESSAGES
+	cp locale/fr_FR/LC_MESSAGES/iramuteq.mo $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/fr_FR/LC_MESSAGES
+	cp locale/pt_PT/LC_MESSAGES/iramuteq.mo $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/pt_PT/LC_MESSAGES
+	cp locale/es_ES/LC_MESSAGES/iramuteq.mo $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/es_ES/LC_MESSAGES
+	cp locale/it_IT/LC_MESSAGES/iramuteq.mo $(CURDIR)/debian/iramuteq/usr/share/iramuteq/locale/it_IT/LC_MESSAGES
+
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs 
+	dh_installdocs
+	dh_installexamples
+#	dh_install
+#	dh_installmenu
+#	dh_installdebconf	
+#	dh_installlogrotate
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+#	dh_python
+#	dh_installinit
+#	dh_installcron
+#	dh_installinfo
+	dh_installman
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+#	dh_perl
+#	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure
