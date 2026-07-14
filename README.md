@@ -79,7 +79,13 @@ python iracmd.py -r data/theses-socio-1000_corpus_1/Corpus.cira -t simitxt
 
 - **`alceste` / `reinert`** — Reinert/Alceste descending hierarchical
   classification. Writes the dendrogram, class profiles/antiprofiles, the
-  chi2 tables and the AFC files.
+  chi2 tables, plus two extra graphics that the GUI only draws on demand:
+  `dendrogramme_texte_1.png` (dendrogram with class profiles) and
+  `dendrogramme_cloud_1.png` (dendrogram with per-class word clouds — needs
+  the R package `wordcloud`). The correspondence analysis (`AFC2D*.png`,
+  `afc_facteur/col/row.csv`) is computed automatically whenever the
+  classification keeps more than 2 classes; raising `nbcl_p1` in a `-c`
+  file is the usual way to obtain more classes.
 - **`stat`** — basic textual statistics: frequencies of active/supplementary
   forms, hapax, Zipf plot, segment sizes, summary (`glob.txt`).
 - **`spec`** — specificities and correspondence analysis. Compares the
@@ -96,8 +102,8 @@ python iracmd.py -r data/theses-socio-1000_corpus_1/Corpus.cira -t simitxt
 Each analysis reads its default parameters from `~/.iramuteq-0.8.a7/`
 (`reinert.cfg`, `stat.cfg`, `simitxt.cfg`); corpus import parameters
 (segment size, lemmatisation, punctuation...) come from `corpus.cfg` (or a
-`-d` file). To customize one run, copy the relevant `.cfg`, edit it, and
-pass it with `-c`, e.g. for the Reinert classification:
+`-d` file). A `-c` file **overrides** those defaults, so it only needs to
+contain the parameters you change, e.g. for the Reinert classification:
 
 ```ini
 [ALCESTE]
@@ -117,6 +123,51 @@ Every run creates a numbered directory next to the corpus file
 files (`.csv`, `.png`, `Analyse.ira`...). Analyses are also recorded in
 `~/.iramuteq-0.8.a7/history.db` and can be re-opened from the GUI's history
 tree.
+
+## Web explorer (Streamlit): `iraexplorer/`
+
+A read-only web interface to browse the results produced by IRaMuTeQ (GUI or
+`iracmd.py`) and to prepare new runs:
+
+```bash
+pip install streamlit pandas altair   # no wxPython needed for the explorer
+streamlit run iraexplorer/app.py
+```
+
+Point the sidebar at a directory containing corpus results (default: `data/`).
+The app shows one page per analysis (Reinert classes with their profiles and
+sample segments, specificity scores per modality, similarity graph, textual
+statistics), plus:
+
+- an **audit panel** on every page: inventory of the files behind the view
+  (path, size, mtime, parse status, optional SHA-256) and a JSON export of
+  the whole analysis;
+- a **"Lancer un calcul" page**: pick a corpus (an existing built corpus, a
+  `.txt` file from the explored directory, or an uploaded file), select the
+  treatments to run (alceste, stat, spec, simitxt) and edit every parameter
+  (corpus import included). The parameters are written as run-specific
+  `.cfg` files under `configs/<run>/` together with a `run.log` journal,
+  the equivalent `iracmd.py` commands are displayed, and the whole pipeline
+  (corpus build, then each analysis) can be launched directly — the chosen
+  Python interpreter must have wxPython. New results appear in the sidebar
+  once the run finishes.
+
+The package is layered so it can back an API later:
+
+- `iraexplorer/model.py` — data layer: loads `Corpus.cira`, the SQLite
+  databases and every analysis directory into plain objects (pandas +
+  stdlib only; no wxPython, no Streamlit, no imports from the IRaMuTeQ
+  code). Each expected file is declared in a manifest with a description;
+  loading never raises — missing/corrupt files are recorded with their
+  status. Everything is serializable via `to_dict()`/`to_json()`.
+- `iraexplorer/configs.py` — reads the default `.cfg` parameters and writes
+  run-specific `.cfg` files compatible with `iracmd.py -c/-d`.
+- `iraexplorer/runner.py` — runs the full pipeline (`-f ... -b` build, then
+  `-r ... -t <type> -c <cfg>` for each analysis) in subprocesses, recording
+  each command, return code and output in `RunStep` objects and a
+  `run.log` file.
+- `iraexplorer/app.py` — the Streamlit UI (one renderer per analysis type,
+  generic fallback for unknown types, plus the run page).
 
 ## Repository layout
 

@@ -31,11 +31,13 @@ import tempfile
 from configparser import ConfigParser, RawConfigParser
 
 from chemins import (ConstructConfigPath, ConstructDicoPath, PathOut,
-                     RscriptsPath)
+                     RscriptsPath, ffr)
 from checkinstall import (CreateIraDirectory, CheckRPath, FindRPAthWin32,
                           FindRPathNix)
 import functions
-from functions import DoConf, History, ReadDicoAsDico, ReadLexique, treat_var_mod
+from functions import (DoConf, History, ReadDicoAsDico, ReadLexique,
+                       treat_var_mod, exec_rcode, check_Rresult, print_liste,
+                       read_list_file)
 
 log = logging.getLogger('iramuteq')
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -195,6 +197,7 @@ class CmdLine :
         if type_analyse in ('alceste', 'reinert') :
             config['type'] = 'alceste'
             self.Text = Reinert(self, corpus, parametres=config)
+            self.make_reinert_graphs(self.Text)
         elif type_analyse == 'stat' :
             config['type'] = 'stat'
             self.Text = Stat(self, corpus, parametres=config)
@@ -283,16 +286,18 @@ class CmdLine :
         self.RPath = self.PathPath.get('PATHS', 'rpath')
 
     def getconfig(self, options) :
-        """paramètres de l'analyse : fichier -c, sinon défauts de ~/.iramuteq-<version>"""
+        """paramètres de l'analyse : défauts de ~/.iramuteq-<version>,
+        surchargés par le fichier -c s'il est fourni (qui peut donc ne
+        contenir que les paramètres modifiés)"""
         if options.type_analyse is None :
             return None
-        if options.configfile is not None :
-            config = DoConf(os.path.abspath(options.configfile)).getoptions()
-        elif options.type_analyse == 'spec' :
+        if options.type_analyse == 'spec' :
             config = {'type' : 'spec', 'lem' : 1, 'mineff' : 3,
                       'indice' : 'hypergeo', 'typeformes' : 0}
         else :
             config = DoConf(self.ConfigPath[ANALYSES[options.type_analyse]]).getoptions()
+        if options.configfile is not None :
+            config.update(DoConf(os.path.abspath(options.configfile)).getoptions())
         # les .cfg livrés contiennent des valeurs vides (pathout, name...)
         # qui ne doivent pas masquer les valeurs calculées par l'analyse
         return dict([(k, v) for k, v in config.items() if v != ''])
@@ -320,6 +325,61 @@ class CmdLine :
         self.history.add(corpus.parametres)
         log.info('corpus construit dans %s' % corpus_parametres['pathout'])
         return copycorpus(corpus)
+
+    def make_reinert_graphs(self, analyse) :
+        """Après une classification : dendrogrammes 'profils' et 'nuages de
+        mots' des classes, comme les boutons dédiés de l'interface graphique
+        (l'AFC, elle, est produite par le script de profils dès que le nombre
+        de classes dépasse 2)."""
+        pathout = analyse.pathout
+        if analyse.parametres.get('time') is None \
+           or not os.path.exists(pathout['Rdendro']) :
+            log.warning('classification incomplète : dendrogrammes '
+                        'supplémentaires non générés')
+            return
+        graphs = [
+            ('dendrogramme_texte_1.png',
+             'plot.dendro.prof(tree.cut1$tree.cl, classes, chistable, nbbycl = 60,'
+             ' type.dendro="phylogram", bw=FALSE, lab=NULL)',
+             'dendrogramme avec les profils des classes'),
+            ('dendrogramme_cloud_1.png',
+             'plot.dendro.cloud(tree.cut1$tree.cl, classes, chistable, nbbycl = 300,'
+             ' type.dendro="phylogram", bw=FALSE, lab=NULL)',
+             'dendrogramme avec les nuages de mots des classes'),
+        ]
+        done = []
+        for outname, plotcall, desc in graphs :
+            fileout = os.path.join(analyse.parametres['pathout'], outname)
+            txt = """
+            library(ape)
+            load("%s")
+            source("%s")
+            classes <- read.csv2("%s", row.names=1)
+            classes <- classes[,1]
+            load("%s")
+            source("%s")
+            if (!exists("debsup") || is.null(debsup)) { debsup <- nrow(dataact) + 1 }
+            if (!exists("debet") || is.null(debet)) { debet <- nrow(dataact) + nrow(datasup) + 1 }
+            chistable <- chistabletot[1:(debsup-1),]
+            open_file_graph("%s", width=1000, height=1000, svg=FALSE)
+            %s
+            """ % (ffr(pathout['Rdendro']), ffr(self.RscriptsPath['Rgraph']),
+                   ffr(pathout['uce']), ffr(pathout['RData']),
+                   ffr(self.RscriptsPath['Rgraph']), ffr(fileout), plotcall)
+            tmpscript = tempfile.mktemp(dir=self.TEMPDIR)
+            with open(tmpscript, 'w', encoding='utf8') as f :
+                f.write(txt)
+            error = exec_rcode(self.RPath, tmpscript, wait=True)
+            if check_Rresult(self, error) and os.path.exists(fileout) :
+                done.append([outname, desc])
+                log.info('graphique : %s' % fileout)
+            else :
+                log.warning('échec de la génération de %s (paquet R wordcloud'
+                            ' installé ?)' % outname)
+        if done and os.path.exists(pathout['liste_graph_chd']) :
+            graph_list = read_list_file(pathout['liste_graph_chd'])
+            graph_list += [g for g in done if g not in graph_list]
+            print_liste(pathout['liste_graph_chd'], graph_list)
 
     def readcorpus(self, options) :
         cira = os.path.abspath(options.read)
