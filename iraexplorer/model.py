@@ -510,3 +510,72 @@ def discover_corpora(root) :
         if cira.parent not in found :
             found.append(cira.parent)
     return found
+
+
+# ---------------------------------------------------------------------------
+# projets : un sous-répertoire du dossier `projects/` qui regroupe le
+# fichier corpus source, les fichiers .cfg du calcul, le journal run.log
+# et les répertoires de résultats
+# ---------------------------------------------------------------------------
+
+def project_info(path) :
+    """Description d'un répertoire de projet (pour la page d'accueil)."""
+    path = Path(path)
+    corpora = discover_corpora(path)
+    analyses = [ira.parent for c in corpora for ira in Path(c).glob('*/Analyse.ira')]
+    mtimes = [p.stat().st_mtime for p in [path] + corpora + analyses]
+    return {
+        'name' : path.name,
+        'path' : str(path),
+        'corpora' : [str(c) for c in corpora],
+        'n_corpora' : len(corpora),
+        'n_analyses' : len(analyses),
+        'analyses_types' : sorted({read_ira(p / 'Analyse.ira')[0] for p in analyses}),
+        'sources' : [str(p) for p in sorted(path.glob('*.txt'))],
+        'configs' : [str(p) for p in sorted(path.glob('*.cfg'))],
+        'modified' : datetime.fromtimestamp(max(mtimes)).isoformat(' ', 'seconds'),
+    }
+
+
+def discover_projects(root) :
+    """Les projets = sous-répertoires (non cachés) du dossier `root`."""
+    root = Path(root)
+    if not root.exists() :
+        return []
+    out = []
+    for child in sorted(root.iterdir()) :
+        if child.is_dir() and not child.name.startswith('.') :
+            try :
+                out.append(project_info(child))
+            except Exception as ex :
+                out.append({'name' : child.name, 'path' : str(child),
+                            'corpora' : [], 'n_corpora' : 0, 'n_analyses' : 0,
+                            'analyses_types' : [], 'sources' : [], 'configs' : [],
+                            'modified' : '', 'error' : str(ex)})
+    return out
+
+
+def _ensure_inside(target, root) :
+    target = Path(target).resolve()
+    root = Path(root).resolve()
+    if target == root or root not in target.parents :
+        raise ValueError('%s n\'est pas dans %s : suppression refusée'
+                         % (target, root))
+    return target
+
+
+def delete_project(path, projects_root) :
+    """Supprime un répertoire de projet (doit être DANS projects_root)."""
+    import shutil
+    target = _ensure_inside(path, projects_root)
+    shutil.rmtree(target)
+
+
+def delete_analysis(path) :
+    """Supprime un répertoire d'analyse (doit contenir un Analyse.ira)."""
+    import shutil
+    path = Path(path).resolve()
+    if not (path / 'Analyse.ira').exists() :
+        raise ValueError('%s ne contient pas de Analyse.ira : suppression refusée'
+                         % path)
+    shutil.rmtree(path)

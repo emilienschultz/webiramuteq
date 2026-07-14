@@ -12,6 +12,12 @@
 #
 # Le script est idempotent : les paquets R déjà installés sont ignorés.
 
+
+# On UBUNTU ADD
+# pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-24.04 wxPython
+# sudo apt-get update
+# sudo apt-get install -y libgtk-3-0t64 libgdk-pixbuf-2.0-0 libnotify4 libsdl2-2.0-0 libwebkit2gtk-4.1-0
+
 set -u
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
