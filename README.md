@@ -9,12 +9,20 @@ all statistics are computed by R.
 Author: Pierre Ratinaud (Université de Toulouse). Python 3 port: Laurent
 Mérat (May 2020). Website: <http://www.iramuteq.org>
 
+The changes made on top of the preliminary sources (command-line entry
+point, web explorer, dependency tooling) are traced in `EVOLUTIONS.md`.
+
 ## Requirements
 
-- Python 3 with **wxPython** (`pip install wxpython`) and **xlrd**
+- Python 3 with the packages listed in `requirements.txt` (wxPython and
+  xlrd for the GUI/CLI; streamlit, pandas and altair for the web explorer)
 - **R** (<https://www.r-project.org>), plus the R packages used by the
   analyses: `ca`, `gee`, `ape`, `igraph`, `proxy`, `wordcloud`, `irlba`,
-  `textometry`, `sna`, `network`, `intergraph`, `rgl`
+  `textometry`, `sna`, `network`, `intergraph`, `rgl` (optional, 3D only)
+
+`./install_deps.sh` installs both sides (`--python /path/to/python` to
+target a virtualenv, `--skip-python` / `--skip-r` to restrict, `--help`
+for details; on Ubuntu see the wxPython note at the top of the script).
 
 On first run, IRaMuTeQ creates `~/.iramuteq-0.8.a7/` with user copies of the
 configuration files and dictionaries, plus `path.cfg` which stores the path
@@ -126,31 +134,35 @@ tree.
 
 ## Web explorer (Streamlit): `iraexplorer/`
 
-A read-only web interface to browse the results produced by IRaMuTeQ (GUI or
-`iracmd.py`) and to prepare new runs:
+A web interface to run IRaMuTeQ computations and browse their results,
+organised in **projects**:
 
 ```bash
-pip install streamlit pandas altair   # no wxPython needed for the explorer
+./install_deps.sh                     # or: pip install -r requirements.txt
 streamlit run iraexplorer/app.py
 ```
 
-Point the sidebar at a directory containing corpus results (default: `data/`).
-The app shows one page per analysis (Reinert classes with their profiles and
-sample segments, specificity scores per modality, similarity graph, textual
-statistics), plus:
+All projects live in a single folder (default: `projects/` at the repo
+root, configurable on the home page). A project is a self-contained
+directory holding the corpus source file, the run-specific `.cfg` files,
+the `run.log` journal and the result directories.
 
-- an **audit panel** on every page: inventory of the files behind the view
-  (path, size, mtime, parse status, optional SHA-256) and a JSON export of
-  the whole analysis;
-- a **"Lancer un calcul" page**: pick a corpus (an existing built corpus, a
-  `.txt` file from the explored directory, or an uploaded file), select the
-  treatments to run (alceste, stat, spec, simitxt) and edit every parameter
-  (corpus import included). The parameters are written as run-specific
-  `.cfg` files under `configs/<run>/` together with a `run.log` journal,
-  the equivalent `iracmd.py` commands are displayed, and the whole pipeline
-  (corpus build, then each analysis) can be launched directly — the chosen
-  Python interpreter must have wxPython. New results appear in the sidebar
-  once the run finishes.
+- **Home page** — list of existing projects (corpus count, analyses,
+  last-modified), with three actions: *create a new analysis* (button),
+  *open* a project, or *delete* one (with confirmation).
+- **Create page** — upload or point to a corpus `.txt` (copied into the
+  project folder), name the project, pick the treatments (alceste, stat,
+  spec, simitxt) and edit every parameter (corpus import included). The
+  parameters are written as `.cfg` files **inside the project folder**,
+  then the whole pipeline (corpus build + each analysis) runs with live
+  step-by-step status — the chosen Python interpreter must have wxPython.
+- **Project view** — one page per analysis (Reinert classes with info.txt
+  summary, dendrograms including the word-cloud variant, AFC, profiles and
+  sample segments; specificities per modality; similarity graph; textual
+  statistics), a *new treatment* page to launch further computations on
+  the project corpus, and per-analysis deletion. Every page has an
+  **audit panel**: inventory of the files behind the view (path, size,
+  mtime, parse status, optional SHA-256) and a JSON export.
 
 The package is layered so it can back an API later:
 
